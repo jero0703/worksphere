@@ -1,0 +1,155 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import {
+  LayoutDashboard,
+  Users,
+  CalendarCheck,
+  CalendarDays,
+  CreditCard,
+  Bell,
+  Shield,
+  Briefcase,
+  X,
+} from 'lucide-react';
+
+export const Sidebar = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
+  const role = user?.role;
+
+  const getDashboardPath = () => {
+    if (role === 'ADMIN') return '/admin/dashboard';
+    if (role === 'HR') return '/hr/dashboard';
+    return '/employee/dashboard';
+  };
+
+  const navItems = [
+    {
+      name: 'Dashboard',
+      path: getDashboardPath(),
+      icon: LayoutDashboard,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Employees',
+      path: '/employees',
+      icon: Users,
+      roles: ['ADMIN', 'HR'],
+    },
+    {
+      name: 'Attendance',
+      path: '/attendance',
+      icon: CalendarCheck,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Leave Management',
+      path: '/leaves',
+      icon: CalendarDays,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Payroll & Payslips',
+      path: '/payroll',
+      icon: CreditCard,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Notifications',
+      path: '/notifications',
+      icon: Bell,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'User Management',
+      path: '/admin/users',
+      icon: Shield,
+      roles: ['ADMIN'],
+    },
+  ];
+
+  const filteredNavItems = navItems.filter((item) => item.roles.includes(role));
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-slate-900/50 z-30 lg:hidden backdrop-blur-xs transition-opacity"
+        />
+      )}
+
+      {/* Sidebar sidebar container */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Header branding */}
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+              <Briefcase className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-lg font-bold text-white tracking-tight">WorkSphere</span>
+              <span className="text-[10px] block uppercase font-semibold text-indigo-400 -mt-1 tracking-wider">
+                HR Enterprise
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md text-slate-400 hover:text-white lg:hidden"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Navigation list */}
+        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
+          {filteredNavItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30 font-semibold'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                  }`
+                }
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* User Card at bottom of sidebar */}
+        <div className="p-4 border-t border-slate-800">
+          <div className="bg-slate-800/60 rounded-xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center border border-indigo-500/30">
+              {user?.employee?.employee_code || 'EMP'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-slate-200 truncate">
+                {user?.employee?.full_name || user?.username}
+              </p>
+              <p className="text-[11px] text-slate-400 truncate capitalize">
+                {user?.role?.toLowerCase()} Portal
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+};
+
+export default Sidebar;
