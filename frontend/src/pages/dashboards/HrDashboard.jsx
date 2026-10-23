@@ -1,20 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, CalendarCheck, Clock, CheckSquare, ArrowUpRight } from 'lucide-react';
+import { dashboardApi } from '../../api/dashboardApi';
+import {
+  Users,
+  CalendarCheck,
+  Clock,
+  CheckSquare,
+  ArrowUpRight,
+  RefreshCw,
+  AlertCircle,
+  CreditCard,
+  UserCheck,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const HrDashboard = () => {
   const { user } = useAuth();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await dashboardApi.getHrDashboard();
+      setData(res);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to load HR dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
 
   return (
     <div className="space-y-6">
+      {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-800 rounded-2xl p-6 sm:p-8 text-white shadow-xl shadow-blue-600/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="text-xs uppercase tracking-wider font-semibold text-blue-200 bg-blue-800/60 px-2.5 py-1 rounded-md inline-block mb-2">
             Human Resources Management
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Welcome, {user?.employee?.full_name || 'HR Manager'}!
+            Welcome, {user?.employee?.full_name || user?.username || 'HR Manager'}!
           </h1>
           <p className="text-blue-100 text-sm mt-1">
             Workforce Management, Attendance Tracking & Leave Operations
@@ -22,11 +54,11 @@ export const HrDashboard = () => {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            to="/employees"
+            to="/attendance"
             className="px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl text-sm shadow-md transition-all flex items-center gap-2"
           >
-            <Users className="w-4 h-4" />
-            <span>Manage Employees</span>
+            <CalendarCheck className="w-4 h-4" />
+            <span>Attendance Log</span>
           </Link>
           <Link
             to="/leaves"
@@ -38,52 +70,75 @@ export const HrDashboard = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-500" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Active Employees</span>
-          <p className="text-2xl font-bold text-slate-800 mt-2">3 Staff</p>
-          <p className="text-xs text-slate-500 mt-1">100% active roster</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {data ? `${data.total_active_employees} Staff` : '—'}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {data ? `${data.departments_count} Active departments` : 'Active roster'}
+          </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Today's Attendance</span>
-          <p className="text-2xl font-bold text-slate-800 mt-2">100%</p>
-          <p className="text-xs text-slate-500 mt-1">Present on duty</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {data ? `${data.today_present_count} Present` : '—'}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {data ? `${data.today_late_count} Late &bull; ${data.today_absent_count} Absent` : 'Attendance logs'}
+          </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Pending Leaves</span>
-          <p className="text-2xl font-bold text-slate-800 mt-2">0 Requests</p>
-          <p className="text-xs text-slate-500 mt-1">All requests up to date</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {data ? `${data.pending_leaves_count} Requests` : '—'}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {data ? `${data.approved_leaves_this_month} approved this month` : 'All requests up to date'}
+          </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Payroll Cycle</span>
-          <p className="text-2xl font-bold text-slate-800 mt-2">October 2026</p>
-          <p className="text-xs text-slate-500 mt-1">Current processing month</p>
+          <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Payroll Disbursed</span>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            ${data ? Number(data.current_month_payroll_total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">Current monthly cycle</p>
         </div>
       </div>
 
+      {/* HR Operations Shortcuts */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <h2 className="text-base font-bold text-slate-900 mb-4">HR Operations Overview</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link
-            to="/employees"
-            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
-          >
-            <div>
-              <p className="font-semibold text-slate-800 text-sm">Employee Directory</p>
-              <p className="text-xs text-slate-500 mt-0.5">Profiles, departments, and roles</p>
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
-          </Link>
           <Link
             to="/attendance"
             className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
           >
             <div>
               <p className="font-semibold text-slate-800 text-sm">Attendance Summary</p>
-              <p className="text-xs text-slate-500 mt-0.5">Daily & monthly attendance logs</p>
+              <p className="text-xs text-slate-500 mt-0.5">Daily & monthly attendance logs & corrections</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+          </Link>
+          <Link
+            to="/leaves"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Leave Approvals</p>
+              <p className="text-xs text-slate-500 mt-0.5">Approve or reject time off with notes</p>
             </div>
             <ArrowUpRight className="w-4 h-4 text-slate-400" />
           </Link>
@@ -98,6 +153,33 @@ export const HrDashboard = () => {
             <ArrowUpRight className="w-4 h-4 text-slate-400" />
           </Link>
         </div>
+
+        {/* Recent Pending Leaves */}
+        {data?.recent_leave_requests && data.recent_leave_requests.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+              Pending Leave Approvals ({data.recent_leave_requests.length})
+            </h3>
+            <div className="space-y-2">
+              {data.recent_leave_requests.map((l) => (
+                <div key={l.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 text-xs">
+                  <div>
+                    <span className="font-bold text-slate-800">{l.employee?.full_name || `Emp #${l.employee_id}`}</span>
+                    <span className="text-slate-400 mx-2">&bull;</span>
+                    <span className="font-semibold text-indigo-700">{l.leave_type}</span>
+                    <span className="text-slate-500 ml-1">({l.days_requested} days: {l.start_date} to {l.end_date})</span>
+                  </div>
+                  <Link
+                    to="/leaves"
+                    className="font-bold text-indigo-600 hover:text-indigo-800 underline"
+                  >
+                    Review &rarr;
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export const RoleRoute = ({ allowedRoles }) => {
+export const RoleRoute = ({ allowedRoles, children }) => {
   const { user, hasRole, loading } = useAuth();
 
   if (loading) {
@@ -17,7 +17,7 @@ export const RoleRoute = ({ allowedRoles }) => {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 export default RoleRoute;

@@ -1,11 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Clock, Calendar, CreditCard, Bell, CheckCircle2, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { dashboardApi } from '../../api/dashboardApi';
+import {
+  Clock,
+  Calendar,
+  CreditCard,
+  Bell,
+  CheckCircle2,
+  AlertCircle,
+  ArrowUpRight,
+  RefreshCw,
+  CalendarDays,
+  FileText,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const EmployeeDashboard = () => {
   const { user } = useAuth();
-  const emp = user?.employee;
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await dashboardApi.getEmployeeDashboard();
+      setData(res);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to load dashboard metrics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const emp = {
+    full_name: data?.full_name || user?.employee?.full_name || user?.username,
+    employee_code: data?.employee_code || user?.employee?.employee_code,
+    department: data?.department || user?.employee?.department,
+    designation: data?.designation || user?.employee?.designation,
+    salary: user?.employee?.salary,
+    status: user?.employee?.status || 'ACTIVE',
+  };
+  const todayAtt = data?.today_attendance;
+  const balances = data?.leave_balances || [];
+  const totalAvailableLeave = balances.reduce((acc, b) => acc + Number(b.remaining_days ?? b.available_days ?? 0), 0);
 
   return (
     <div className="space-y-6">
@@ -40,19 +83,38 @@ export const EmployeeDashboard = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-500" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Attendance Card */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Today's Shift</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${todayAtt?.check_in ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-800 mt-2">Active</p>
-          <p className="text-xs text-slate-500 mt-1">Standard 8.0 hrs workday</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {todayAtt?.check_in
+              ? todayAtt.check_out
+                ? 'Completed'
+                : 'Clocked In'
+              : 'Not Clocked'}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {todayAtt?.check_in
+              ? `In: ${new Date(todayAtt.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${todayAtt.check_out ? ` | Out: ${new Date(todayAtt.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`
+              : 'Standard 8.0 hrs workday'}
+          </p>
         </div>
 
+        {/* Leave Balance Card */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Leave Balance</span>
@@ -60,13 +122,16 @@ export const EmployeeDashboard = () => {
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-800 mt-2">18 Days</p>
-          <p className="text-xs text-slate-500 mt-1">Paid & Casual leaves</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">{totalAvailableLeave} Days</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {data?.pending_leaves_count !== undefined ? `${data.pending_leaves_count} request(s) pending` : 'Paid, Sick & Casual balance'}
+          </p>
         </div>
 
+        {/* Monthly Salary Card */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Monthly Salary</span>
+            <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Monthly Base</span>
             <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
               <CreditCard className="w-4 h-4" />
             </div>
@@ -74,9 +139,12 @@ export const EmployeeDashboard = () => {
           <p className="text-2xl font-bold text-slate-800 mt-2">
             ${emp?.salary ? Number(emp.salary).toLocaleString() : '—'}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Monthly base salary</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {data?.latest_payroll ? `Latest: ${data.latest_payroll.month} ($${Number(data.latest_payroll.net_salary).toLocaleString()})` : 'Monthly base salary'}
+          </p>
         </div>
 
+        {/* Notifications Card */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Notifications</span>
@@ -84,15 +152,17 @@ export const EmployeeDashboard = () => {
               <Bell className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-800 mt-2">1 Unread</p>
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {data?.unread_notifications_count ?? 0} Unread
+          </p>
           <p className="text-xs text-slate-500 mt-1">System & HR notifications</p>
         </div>
       </div>
 
-      {/* Quick Access Grid */}
+      {/* Quick Access & Recent Updates */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs col-span-2">
-          <h2 className="text-base font-bold text-slate-900 mb-4">Quick Shortcuts</h2>
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs col-span-2 space-y-4">
+          <h2 className="text-base font-bold text-slate-900">Quick Shortcuts</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               to="/attendance"
@@ -138,6 +208,31 @@ export const EmployeeDashboard = () => {
               <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
             </Link>
           </div>
+
+          {/* Recent Leaves preview */}
+          {data?.recent_leaves && data.recent_leaves.length > 0 && (
+            <div className="pt-4 border-t border-slate-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Recent Leave Requests
+              </h3>
+              <div className="space-y-2">
+                {data.recent_leaves.map((l) => (
+                  <div key={l.id} className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-slate-50">
+                    <span className="font-semibold text-slate-800">
+                      {l.leave_type} ({l.days_requested} days)
+                    </span>
+                    <span className="text-slate-500">{l.start_date} to {l.end_date}</span>
+                    <span className={`font-bold px-2 py-0.5 rounded ${
+                      l.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
+                      l.status === 'REJECTED' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {l.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">

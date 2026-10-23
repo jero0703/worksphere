@@ -1,11 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { notificationApi } from '../../api/notificationApi';
 import { Bell, LogOut, User as UserIcon, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUnread = async () => {
+      try {
+        const res = await notificationApi.getUnreadCount();
+        if (isMounted && res?.unread_count !== undefined) {
+          setUnreadCount(res.unread_count);
+        }
+      } catch (err) {
+        // Silently ignore background polling errors
+      }
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000); // refresh every 30s
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -51,7 +74,13 @@ export const Navbar = ({ onToggleSidebar }) => {
           title="Notifications"
         >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full"></span>
+          {unreadCount > 0 ? (
+            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-indigo-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          ) : (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-slate-300 rounded-full" />
+          )}
         </button>
 
         {/* User Badge & Profile */}
@@ -65,7 +94,7 @@ export const Navbar = ({ onToggleSidebar }) => {
                 {user?.role}
               </span>
               <span className="text-xs text-slate-500">
-                {user?.employee?.department || 'Member'}
+                {user?.employee?.department || 'Staff'}
               </span>
             </div>
           </div>
