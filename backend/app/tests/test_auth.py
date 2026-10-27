@@ -101,3 +101,31 @@ def test_employee_cannot_list_users(client, employee_token):
     response = client.get("/api/users", headers=headers)
     assert response.status_code == 403
     assert "Access denied" in response.json()["detail"]
+
+
+def test_oauth2_token_endpoint_swagger(client):
+    form_payload = {
+        "username": "test_admin@worksphere.com",
+        "password": "Admin@123",
+    }
+    response = client.post("/api/auth/token", data=form_payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_logout_unauthenticated(client):
+    response = client.post("/api/auth/logout")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Successfully logged out"
+
+
+def test_logout_authenticated(client, employee_token):
+    headers = {"Authorization": f"Bearer {employee_token}"}
+    response = client.post("/api/auth/logout", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "test_employee"
+

@@ -56,4 +56,9 @@ export const leaveApi = {
     const response = await api.patch(`/leaves/${leaveId}/cancel`);
     return response.data;
   },
+
+  getCalendar: async (params = {}) => {
+    const response = await api.get('/leaves/calendar', { params });
+    return response.data;
+  },
 };

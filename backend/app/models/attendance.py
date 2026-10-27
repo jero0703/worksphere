@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Date, DateTime, Numeric, ForeignKey, Enum as SQLEnum, Text, UniqueConstraint, func
+from sqlalchemy import Column, Integer, Date, DateTime, Numeric, Boolean, ForeignKey, Enum as SQLEnum, Text, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 from enum import Enum
 
@@ -26,7 +26,16 @@ class Attendance(Base):
         nullable=False,
         index=True,
     )
+    is_late = Column(Boolean, default=False, nullable=False)
+    late_minutes = Column(Integer, default=0, nullable=False)
+    is_early_departure = Column(Boolean, default=False, nullable=False)
+    early_departure_minutes = Column(Integer, default=0, nullable=False)
+    shift_id = Column(Integer, ForeignKey("shifts.id", ondelete="SET NULL"), nullable=True, index=True)
+    overtime_hours = Column(Numeric(5, 2), default=0.00, nullable=False)
     notes = Column(Text, nullable=True)
+    correction_notes = Column(Text, nullable=True)
+    corrected_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    corrected_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -36,3 +45,5 @@ class Attendance(Base):
 
     # Relationships
     employee = relationship("Employee", back_populates="attendances")
+    corrector = relationship("User", foreign_keys=[corrected_by])
+    shift = relationship("Shift", back_populates="attendances")

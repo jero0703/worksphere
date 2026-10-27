@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Workday rules
     WORK_DAY_HOURS: float = 8.0
     HALF_DAY_HOURS: float = 4.0
+    WORK_START_TIME: str = "09:00"
+    LATE_GRACE_MINUTES: int = 15
+    AUTO_ABSENT_CUTOFF_HOUR: int = 18
 
     model_config = SettingsConfigDict(
         env_file=".env",

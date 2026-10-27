@@ -62,6 +62,17 @@ def register_user(db: Session, req: RegisterRequest) -> User:
         status=EmployeeStatus.ACTIVE,
     )
     db.add(employee)
+    db.flush()
+
+    # Initialize leave balances for newly registered employee
+    from app.models.leave import LeavePolicy, LeaveBalance
+    policies = db.query(LeavePolicy).all()
+    for policy in policies:
+        db.add(LeaveBalance(
+            employee_id=employee.id,
+            leave_type=policy.leave_type,
+            remaining_days=policy.total_days_allowed,
+        ))
 
     # Welcome notification
     welcome_notification = Notification(

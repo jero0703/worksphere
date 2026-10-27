@@ -33,6 +33,21 @@ def require_any_role(allowed_roles: List[UserRole]) -> Callable:
     return role_checker
 
 
+def verify_employee_ownership(current_user: User, employee_id: int) -> bool:
+    """
+    Enforces resource ownership.
+    EMPLOYEE can only access their own records.
+    HR and ADMIN have elevated access to organizational records.
+    """
+    if current_user.role == UserRole.EMPLOYEE:
+        if not current_user.employee or current_user.employee.id != employee_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: You can only access your own personal records.",
+            )
+    return True
+
+
 # Commonly used dependencies
 require_admin = require_role(UserRole.ADMIN)
 require_hr = require_role(UserRole.HR)

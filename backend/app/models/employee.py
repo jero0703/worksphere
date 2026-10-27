@@ -35,4 +35,8 @@ class Employee(Base):
     user = relationship("User", back_populates="employee")
     attendances = relationship("Attendance", back_populates="employee", cascade="all, delete-orphan")
     leaves = relationship("Leave", back_populates="employee", cascade="all, delete-orphan")
+    leave_balances = relationship("LeaveBalance", back_populates="employee", cascade="all, delete-orphan")
     payrolls = relationship("Payroll", back_populates="employee", cascade="all, delete-orphan")
+    employee_shifts = relationship("EmployeeShift", back_populates="employee", cascade="all, delete-orphan", order_by="desc(EmployeeShift.effective_from)")
+    documents = relationship("Document", back_populates="employee", cascade="all, delete-orphan", order_by="desc(Document.uploaded_at)")
+    performances = relationship("Performance", back_populates="employee", cascade="all, delete-orphan", order_by="desc(Performance.created_at)")

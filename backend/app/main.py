@@ -6,7 +6,20 @@ import logging
 
 from app.core.config import settings
 from app.db.init_db import init_db
-from app.routers import auth, users
+from app.routers import (
+    auth,
+    users,
+    attendance,
+    leaves,
+    payroll,
+    notifications,
+    dashboard,
+    shifts,
+    documents,
+    performance,
+    analytics,
+    employees,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +54,8 @@ origins = [
     settings.FRONTEND_ORIGIN,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
 
 app.add_middleware(
@@ -63,6 +78,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Include Routers
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
+app.include_router(attendance.router, prefix=settings.API_V1_STR)
+app.include_router(leaves.router, prefix=settings.API_V1_STR)
+app.include_router(payroll.router, prefix=settings.API_V1_STR)
+app.include_router(notifications.router, prefix=settings.API_V1_STR)
+app.include_router(dashboard.router, prefix=settings.API_V1_STR)
+app.include_router(shifts.router, prefix=settings.API_V1_STR)
+app.include_router(documents.router, prefix=settings.API_V1_STR)
+app.include_router(performance.router, prefix=settings.API_V1_STR)
+app.include_router(analytics.router, prefix=settings.API_V1_STR)
+app.include_router(employees.router, prefix=settings.API_V1_STR)
 
 
 @app.get(f"{settings.API_V1_STR}/health", tags=["Health"])

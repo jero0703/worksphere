@@ -17,23 +17,15 @@ import HrDashboard from './pages/dashboards/HrDashboard';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
 
 import AttendanceDashboard from './pages/attendance/AttendanceDashboard';
+import { ShiftManagement } from './pages/shifts/ShiftManagement';
 import LeaveDashboard from './pages/leaves/LeaveDashboard';
+import LeaveCalendar from './pages/leaves/LeaveCalendar';
 import PayrollDashboard from './pages/payroll/PayrollDashboard';
 import NotificationCenter from './pages/notifications/NotificationCenter';
-
-// Module placeholder for directory
-const ModulePlaceholder = ({ title, description }) => (
-  <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center max-w-xl mx-auto shadow-xs mt-10">
-    <div className="w-12 h-12 bg-indigo-50 border border-indigo-200 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-lg">
-      WS
-    </div>
-    <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-    <p className="text-sm text-slate-500 mt-2">{description}</p>
-    <div className="mt-6 inline-flex items-center px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
-      Phase 2 Core Operations Active &bull; Directory Integration
-    </div>
-  </div>
-);
+import DocumentCenter from './pages/documents/DocumentCenter';
+import PerformanceDashboard from './pages/performance/PerformanceDashboard';
+import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
+import EmployeeDirectory from './pages/employees/EmployeeDirectory';
 
 export function App() {
   return (
@@ -88,6 +80,16 @@ export function App() {
                 }
               />
 
+              {/* Organization Directory & Advanced Search */}
+              <Route
+                path="/employees"
+                element={
+                  <RoleRoute allowedRoles={['HR', 'ADMIN']}>
+                    <EmployeeDirectory />
+                  </RoleRoute>
+                }
+              />
+
               {/* Attendance Management */}
               <Route
                 path="/attendance"
@@ -98,12 +100,62 @@ export function App() {
                 }
               />
 
+              {/* Shift & Schedule Management */}
+              <Route
+                path="/shifts"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <ShiftManagement />
+                  </RoleRoute>
+                }
+              />
+
               {/* Leave Management */}
               <Route
                 path="/leaves"
                 element={
                   <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
                     <LeaveDashboard />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Team Leave Calendar */}
+              <Route
+                path="/leaves/calendar"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <LeaveCalendar />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Document Management Center */}
+              <Route
+                path="/documents"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <DocumentCenter />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Performance Management System */}
+              <Route
+                path="/performance"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <PerformanceDashboard />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Advanced Analytics & Reports */}
+              <Route
+                path="/analytics"
+                element={
+                  <RoleRoute allowedRoles={['HR', 'ADMIN']}>
+                    <AnalyticsDashboard />
                   </RoleRoute>
                 }
               />
@@ -124,16 +176,6 @@ export function App() {
                 element={
                   <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
                     <NotificationCenter />
-                  </RoleRoute>
-                }
-              />
-
-              {/* Organization Directory */}
-              <Route
-                path="/employees"
-                element={
-                  <RoleRoute allowedRoles={['HR', 'ADMIN']}>
-                    <AdminUsers />
                   </RoleRoute>
                 }
               />

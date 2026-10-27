@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, time
+from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from app.db.base import Base
@@ -6,15 +7,78 @@ from app.db.database import engine, SessionLocal
 from app.models.user import User
 from app.models.employee import Employee, EmployeeStatus
 from app.models.attendance import Attendance
-from app.models.leave import Leave
+from app.models.leave import Leave, LeavePolicy, LeaveBalance, LeaveType
 from app.models.payroll import Payroll
 from app.models.notification import Notification
+from app.models.shift import Shift, EmployeeShift
 from app.core.security import hash_password
 from app.core.permissions import UserRole
 
 
+def init_default_shifts(db: Session) -> None:
+    """Ensure baseline organizational shifts exist and assign default shifts to employees."""
+    shifts_data = [
+        {"name": "Morning Shift", "start_time": time(9, 0), "end_time": time(17, 0), "description": "Standard day shift (09:00 - 17:00)"},
+        {"name": "Evening Shift", "start_time": time(16, 0), "end_time": time(0, 0), "description": "Afternoon & evening shift (16:00 - 00:00)"},
+        {"name": "Night Shift", "start_time": time(22, 0), "end_time": time(6, 0), "description": "Overnight coverage shift (22:00 - 06:00)"},
+    ]
+
+    created_shifts = {}
+    for item in shifts_data:
+        shift = db.query(Shift).filter(Shift.name == item["name"]).first()
+        if not shift:
+            shift = Shift(
+                name=item["name"],
+                start_time=item["start_time"],
+                end_time=item["end_time"],
+                description=item["description"],
+                is_active=True,
+            )
+            db.add(shift)
+            db.flush()
+        created_shifts[item["name"]] = shift
+
+
+def init_leave_policies_and_balances(db: Session) -> None:
+    """Ensure baseline leave policies and employee balances are established."""
+    default_policies = {
+        LeaveType.SICK: Decimal("10.0"),
+        LeaveType.CASUAL: Decimal("12.0"),
+        LeaveType.PAID: Decimal("18.0"),
+    }
+
+    # Seed Leave Policies
+    for leave_type, days in default_policies.items():
+        policy = db.query(LeavePolicy).filter(LeavePolicy.leave_type == leave_type).first()
+        if not policy:
+            policy = LeavePolicy(
+                leave_type=leave_type,
+                total_days_allowed=days,
+            )
+            db.add(policy)
+
+    db.flush()
+
+    # Seed Leave Balances for all active employees
+    employees = db.query(Employee).all()
+    for emp in employees:
+        for leave_type, days in default_policies.items():
+            balance = (
+                db.query(LeaveBalance)
+                .filter(LeaveBalance.employee_id == emp.id, LeaveBalance.leave_type == leave_type)
+                .first()
+            )
+            if not balance:
+                balance = LeaveBalance(
+                    employee_id=emp.id,
+                    leave_type=leave_type,
+                    remaining_days=days,
+                )
+                db.add(balance)
+
+
 def init_db(db: Session = None) -> None:
-    """Create all database tables and seed baseline user accounts."""
+    """Create all database tables and seed baseline user accounts and leave policies."""
     # Create tables
     Base.metadata.create_all(bind=engine)
 
@@ -120,8 +184,16 @@ def init_db(db: Session = None) -> None:
                 message="Your employee portal is active. You can check in daily and request leaves.",
             ))
 
+        db.flush()
+
+        # Seed policies and balances
+        init_leave_policies_and_balances(db)
+
+        # Seed shifts and assignments
+        init_default_shifts(db)
+
         db.commit()
-        print("Database initialized and seed accounts verified.")
+        print("Database initialized, seed accounts, leave policies, and shifts verified.")
     finally:
         if close_session:
             db.close()

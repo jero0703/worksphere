@@ -10,7 +10,11 @@ import {
   Bell,
   Shield,
   Briefcase,
+  Clock,
   X,
+  FileText,
+  Award,
+  BarChart3,
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -43,10 +47,34 @@ export const Sidebar = ({ isOpen, onClose }) => {
       roles: ['ADMIN', 'HR', 'EMPLOYEE'],
     },
     {
+      name: 'Shifts & Schedule',
+      path: '/shifts',
+      icon: Clock,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
       name: 'Leave Management',
       path: '/leaves',
       icon: CalendarDays,
       roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Documents',
+      path: '/documents',
+      icon: FileText,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Performance',
+      path: '/performance',
+      icon: Award,
+      roles: ['ADMIN', 'HR', 'EMPLOYEE'],
+    },
+    {
+      name: 'Analytics & Reports',
+      path: '/analytics',
+      icon: BarChart3,
+      roles: ['ADMIN', 'HR'],
     },
     {
       name: 'Payroll & Payslips',

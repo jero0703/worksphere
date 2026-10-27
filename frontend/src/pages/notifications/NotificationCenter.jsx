@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { notificationApi } from '../../api/notificationApi';
 import {
   Bell,
@@ -11,12 +12,15 @@ import {
   CheckCheck,
   X,
   Info,
+  Trash2,
+  ExternalLink,
+  Award,
 } from 'lucide-react';
 
 export const NotificationCenter = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [filter, setFilter] = useState('ALL'); // 'ALL' | 'UNREAD'
+  const [filter, setFilter] = useState('ALL'); // 'ALL' | 'UNREAD' | 'ATTENDANCE' | 'LEAVE' | 'PAYROLL' | 'SHIFT'
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
@@ -72,22 +76,54 @@ export const NotificationCenter = () => {
     }
   };
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'LEAVE':
-        return <Calendar className="w-5 h-5 text-indigo-600" />;
-      case 'PAYROLL':
-        return <CreditCard className="w-5 h-5 text-emerald-600" />;
-      case 'ATTENDANCE':
-        return <Clock className="w-5 h-5 text-blue-600" />;
-      case 'SYSTEM':
-      default:
-        return <Info className="w-5 h-5 text-purple-600" />;
+  const handleDelete = async (id) => {
+    try {
+      await notificationApi.deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setSuccessMsg('Notification removed.');
+    } catch (err) {
+      setError('Failed to delete notification');
     }
+  };
+
+  const getNotificationIcon = (title = '', msg = '') => {
+    const text = (title + ' ' + msg).toLowerCase();
+    if (text.includes('leave')) {
+      return <Calendar className="w-5 h-5 text-indigo-600" />;
+    }
+    if (text.includes('payroll') || text.includes('salary') || text.includes('payslip')) {
+      return <CreditCard className="w-5 h-5 text-emerald-600" />;
+    }
+    if (text.includes('late') || text.includes('attendance') || text.includes('check-in')) {
+      return <Clock className="w-5 h-5 text-amber-600" />;
+    }
+    if (text.includes('shift')) {
+      return <Clock className="w-5 h-5 text-blue-600" />;
+    }
+    if (text.includes('performance') || text.includes('review') || text.includes('rating')) {
+      return <Award className="w-5 h-5 text-purple-600" />;
+    }
+    return <Info className="w-5 h-5 text-indigo-600" />;
   };
 
   const filteredNotifications = notifications.filter((n) => {
     if (filter === 'UNREAD') return !n.is_read;
+    if (filter === 'ATTENDANCE') {
+      const text = (n.title + ' ' + n.message).toLowerCase();
+      return text.includes('late') || text.includes('attendance') || text.includes('check-in');
+    }
+    if (filter === 'LEAVE') {
+      const text = (n.title + ' ' + n.message).toLowerCase();
+      return text.includes('leave');
+    }
+    if (filter === 'PAYROLL') {
+      const text = (n.title + ' ' + n.message).toLowerCase();
+      return text.includes('payroll') || text.includes('salary') || text.includes('payslip');
+    }
+    if (filter === 'SHIFT') {
+      const text = (n.title + ' ' + n.message).toLowerCase();
+      return text.includes('shift');
+    }
     return true;
   });
 
@@ -97,15 +133,15 @@ export const NotificationCenter = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Notification Center</span>
+            <span>Notification & Smart Alert Center</span>
             {unreadCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white shadow-xs">
                 {unreadCount} New
               </span>
             )}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Stay informed with leave updates, attendance reminders, and payroll release notices.
+            Real-time alerts for late arrivals, leave decisions, shift roster updates, and released payslips.
           </p>
         </div>
 
@@ -158,27 +194,27 @@ export const NotificationCenter = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <button
-          onClick={() => setFilter('ALL')}
-          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-            filter === 'ALL'
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          All ({notifications.length})
-        </button>
-        <button
-          onClick={() => setFilter('UNREAD')}
-          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-            filter === 'UNREAD'
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          Unread ({unreadCount})
-        </button>
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        {[
+          { label: `All (${notifications.length})`, value: 'ALL' },
+          { label: `Unread (${unreadCount})`, value: 'UNREAD' },
+          { label: 'Late Attendance', value: 'ATTENDANCE' },
+          { label: 'Leaves', value: 'LEAVE' },
+          { label: 'Payroll', value: 'PAYROLL' },
+          { label: 'Shifts', value: 'SHIFT' },
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setFilter(tab.value)}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors ${
+              filter === tab.value
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Notification List */}
@@ -194,7 +230,7 @@ export const NotificationCenter = () => {
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-slate-800">You're all caught up!</h3>
-            <p className="text-xs text-slate-500 mt-1">No pending notifications to review.</p>
+            <p className="text-xs text-slate-500 mt-1">No alerts match the selected filter.</p>
           </div>
         ) : (
           filteredNotifications.map((notif) => (
@@ -212,7 +248,7 @@ export const NotificationCenter = () => {
                     notif.is_read ? 'bg-slate-100 border-slate-200' : 'bg-white border-indigo-200'
                   }`}
                 >
-                  {getNotificationIcon(notif.notification_type)}
+                  {getNotificationIcon(notif.title, notif.message)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -229,25 +265,43 @@ export const NotificationCenter = () => {
                   </div>
                   <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notif.message}</p>
                   <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                    <span className="font-semibold uppercase tracking-wider text-slate-500">
-                      {notif.notification_type}
-                    </span>
-                    <span>&bull;</span>
                     <span>{new Date(notif.created_at).toLocaleString()}</span>
+                    {notif.link && (
+                      <>
+                        <span>&bull;</span>
+                        <Link
+                          to={notif.link}
+                          className="inline-flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800"
+                        >
+                          <span>Open details</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {!notif.is_read && (
+              <div className="flex items-center gap-1 shrink-0">
+                {!notif.is_read && (
+                  <button
+                    type="button"
+                    onClick={() => handleMarkAsRead(notif.id)}
+                    disabled={actionLoading}
+                    className="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100/60 rounded-lg transition-colors"
+                  >
+                    Mark read
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => handleMarkAsRead(notif.id)}
-                  disabled={actionLoading}
-                  className="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100/60 rounded-lg transition-colors shrink-0"
+                  onClick={() => handleDelete(notif.id)}
+                  className="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
+                  title="Delete"
                 >
-                  Mark read
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
-              )}
+              </div>
             </div>
           ))
         )}

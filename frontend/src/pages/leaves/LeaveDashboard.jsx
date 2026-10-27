@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { leaveApi } from '../../api/leaveApi';
+import { LeaveCalendar } from './LeaveCalendar';
 import {
   CalendarDays,
   Plus,
@@ -355,6 +356,18 @@ export const LeaveDashboard = () => {
             My Applications ({myLeaves.length})
           </button>
 
+          <button
+            onClick={() => setActiveTab('calendar')}
+            className={`pb-3 text-sm font-semibold transition-all relative flex items-center gap-1.5 ${
+              activeTab === 'calendar'
+                ? 'text-indigo-600 border-b-2 border-indigo-600'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Team Leave Calendar</span>
+          </button>
+
           {isHrOrAdmin && (
             <>
               <button
@@ -565,6 +578,13 @@ export const LeaveDashboard = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Tab 4: Team Leave Calendar */}
+      {activeTab === 'calendar' && (
+        <div className="mt-2">
+          <LeaveCalendar />
         </div>
       )}
 

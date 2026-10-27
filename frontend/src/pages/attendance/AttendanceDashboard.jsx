@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { attendanceApi } from '../../api/attendanceApi';
+import { shiftApi } from '../../api/shiftApi';
 import {
   Clock,
   CheckCircle,
@@ -23,6 +24,7 @@ export const AttendanceDashboard = () => {
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' | 'management'
   const [todayStatus, setTodayStatus] = useState(null);
   const [personalHistory, setPersonalHistory] = useState([]);
+  const [myShift, setMyShift] = useState(null);
   const [allAttendance, setAllAttendance] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,13 +47,15 @@ export const AttendanceDashboard = () => {
     try {
       setLoading(true);
       setError('');
-      // Load personal status
-      const [today, history] = await Promise.all([
+      // Load personal status & shift details
+      const [today, history, shiftInfo] = await Promise.all([
         attendanceApi.getTodayStatus(),
         attendanceApi.getPersonalHistory(),
+        shiftApi.getMyShift().catch(() => null),
       ]);
       setTodayStatus(today);
       setPersonalHistory(history);
+      setMyShift(shiftInfo);
 
       if (isHrOrAdmin) {
         const [mgmtRecords, summaryData] = await Promise.all([
@@ -151,17 +155,36 @@ export const AttendanceDashboard = () => {
     }
   };
 
-  const getStatusBadge = (status, isLate) => {
-    if (status === 'ABSENT') {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Absent</span>;
-    }
-    if (status === 'HALF_DAY') {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Half Day</span>;
-    }
-    if (isLate) {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">Present (Late)</span>;
-    }
-    return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Present (On-Time)</span>;
+  const getStatusBadge = (status, isLate, isEarlyDeparture, lateMinutes = 0, earlyMinutes = 0) => {
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        {status === 'ABSENT' && (
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+            Absent
+          </span>
+        )}
+        {status === 'HALF_DAY' && (
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            Half Day
+          </span>
+        )}
+        {status === 'PRESENT' && !isLate && (
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Present
+          </span>
+        )}
+        {isLate && (
+          <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+            Late {lateMinutes ? `(+${lateMinutes}m)` : ''}
+          </span>
+        )}
+        {isEarlyDeparture && (
+          <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+            Early Dep {earlyMinutes ? `(-${earlyMinutes}m)` : ''}
+          </span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -233,10 +256,25 @@ export const AttendanceDashboard = () => {
                 <h2 className="text-xl font-bold text-slate-900">
                   {todayStatus?.status ? todayStatus.status : 'Not Clocked In'}
                 </h2>
-                {todayStatus && getStatusBadge(todayStatus.status, todayStatus.is_late)}
+                {todayStatus &&
+                  getStatusBadge(
+                    todayStatus.status,
+                    todayStatus.is_late,
+                    todayStatus.is_early_departure,
+                    todayStatus.late_minutes,
+                    todayStatus.early_departure_minutes
+                  )}
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Standard shift begins at 09:00 AM (15m grace period) &bull; Minimum 8.0 hrs full-day
+                {myShift?.active_shift ? (
+                  <span className="inline-flex items-center gap-1.5 font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                    Assigned Shift: {myShift.active_shift.name} ({myShift.active_shift.start_time.slice(0, 5)} -{' '}
+                    {myShift.active_shift.end_time.slice(0, 5)}, {myShift.active_shift.duration_hours}h)
+                    {myShift.active_shift.is_overnight && ' (Overnight)'}
+                  </span>
+                ) : (
+                  <span>Standard shift begins at 09:00 AM (15m grace period) &bull; Minimum 8.0 hrs full-day</span>
+                )}
               </p>
             </div>
           </div>
@@ -300,6 +338,7 @@ export const AttendanceDashboard = () => {
               <thead className="bg-slate-50/80 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-3.5">Date</th>
+                  <th className="px-6 py-3.5">Shift</th>
                   <th className="px-6 py-3.5">Check In</th>
                   <th className="px-6 py-3.5">Check Out</th>
                   <th className="px-6 py-3.5">Working Hours</th>
@@ -310,7 +349,7 @@ export const AttendanceDashboard = () => {
               <tbody className="divide-y divide-slate-100">
                 {personalHistory.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-slate-400">
+                    <td colSpan="7" className="px-6 py-8 text-center text-slate-400">
                       No attendance records found yet. Check in above to start your log.
                     </td>
                   </tr>
@@ -319,6 +358,11 @@ export const AttendanceDashboard = () => {
                     <tr key={rec.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="px-6 py-4 font-semibold text-slate-800">
                         {rec.date}
+                      </td>
+                      <td className="px-6 py-4 text-xs font-medium text-slate-700">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                          {rec.shift_name || 'Standard'}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         {rec.check_in
@@ -334,7 +378,13 @@ export const AttendanceDashboard = () => {
                         {rec.working_hours} hrs
                       </td>
                       <td className="px-6 py-4">
-                        {getStatusBadge(rec.status, rec.is_late)}
+                        {getStatusBadge(
+                          rec.status,
+                          rec.is_late,
+                          rec.is_early_departure,
+                          rec.late_minutes,
+                          rec.early_departure_minutes
+                        )}
                       </td>
                       <td className="px-6 py-4 text-xs font-semibold text-slate-700">
                         {Number(rec.overtime_hours) > 0 ? `+${rec.overtime_hours} hrs` : '—'}
@@ -439,6 +489,7 @@ export const AttendanceDashboard = () => {
                 <thead className="bg-slate-50/80 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
                   <tr>
                     <th className="px-6 py-3.5">Employee</th>
+                    <th className="px-6 py-3.5">Shift</th>
                     <th className="px-6 py-3.5">Date</th>
                     <th className="px-6 py-3.5">Check In / Out</th>
                     <th className="px-6 py-3.5">Working Hours</th>
@@ -449,7 +500,7 @@ export const AttendanceDashboard = () => {
                 <tbody className="divide-y divide-slate-100">
                   {allAttendance.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-8 text-center text-slate-400">
+                      <td colSpan="7" className="px-6 py-8 text-center text-slate-400">
                         No records match the specified filters.
                       </td>
                     </tr>
@@ -459,6 +510,11 @@ export const AttendanceDashboard = () => {
                         <td className="px-6 py-4">
                           <div className="font-semibold text-slate-900">{rec.employee_name || 'Staff'}</div>
                           <div className="text-xs text-slate-500">{rec.employee_code} &bull; {rec.department}</div>
+                        </td>
+                        <td className="px-6 py-4 text-xs font-medium text-slate-700">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                            {rec.shift_name || 'Standard'}
+                          </span>
                         </td>
                         <td className="px-6 py-4 font-medium text-slate-800">{rec.date}</td>
                         <td className="px-6 py-4 text-xs">
@@ -472,7 +528,13 @@ export const AttendanceDashboard = () => {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {getStatusBadge(rec.status, rec.is_late)}
+                          {getStatusBadge(
+                            rec.status,
+                            rec.is_late,
+                            rec.is_early_departure,
+                            rec.late_minutes,
+                            rec.early_departure_minutes
+                          )}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
