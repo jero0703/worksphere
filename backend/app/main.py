@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import os
 import logging
 
 from app.core.config import settings
@@ -19,6 +20,14 @@ from app.routers import (
     performance,
     analytics,
     employees,
+    onboarding,
+    resignations,
+    announcements,
+    tasks,
+    calendar_integration,
+    exports,
+    feedback,
+    profile,
 )
 
 # Configure logging
@@ -32,9 +41,13 @@ logger = logging.getLogger("worksphere")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize database tables and seed baseline accounts
-    logger.info("Initializing WorkSphere database schema and seeds...")
-    init_db()
-    logger.info("Database initialization complete.")
+    if not os.getenv("TESTING"):
+        try:
+            logger.info("Initializing WorkSphere database schema and seeds...")
+            init_db()
+            logger.info("Database initialization complete.")
+        except Exception as e:
+            logger.warning(f"Database initialization deferred or unavailable: {e}")
     yield
     # Shutdown
     logger.info("WorkSphere server shutting down.")
@@ -88,6 +101,14 @@ app.include_router(documents.router, prefix=settings.API_V1_STR)
 app.include_router(performance.router, prefix=settings.API_V1_STR)
 app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(employees.router, prefix=settings.API_V1_STR)
+app.include_router(onboarding.router, prefix=settings.API_V1_STR)
+app.include_router(resignations.router, prefix=settings.API_V1_STR)
+app.include_router(announcements.router, prefix=settings.API_V1_STR)
+app.include_router(tasks.router, prefix=settings.API_V1_STR)
+app.include_router(calendar_integration.router, prefix=settings.API_V1_STR)
+app.include_router(exports.router, prefix=settings.API_V1_STR)
+app.include_router(feedback.router, prefix=settings.API_V1_STR)
+app.include_router(profile.router, prefix=settings.API_V1_STR)
 
 
 @app.get(f"{settings.API_V1_STR}/health", tags=["Health"])

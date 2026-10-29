@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { applyTheme, getSavedTheme } from './utils/theme';
 import ProtectedRoute from './routes/ProtectedRoute';
 import RoleRoute from './routes/RoleRoute';
 import AuthLayout from './layouts/AuthLayout';
@@ -26,8 +27,18 @@ import DocumentCenter from './pages/documents/DocumentCenter';
 import PerformanceDashboard from './pages/performance/PerformanceDashboard';
 import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
 import EmployeeDirectory from './pages/employees/EmployeeDirectory';
+import OnboardingChecklist from './pages/onboarding/OnboardingChecklist';
+import ResignationCenter from './pages/resignations/ResignationCenter';
+import AnnouncementBoard from './pages/announcements/AnnouncementBoard';
+import TaskManager from './pages/tasks/TaskManager';
+import FeedbackCenter from './pages/feedback/FeedbackCenter';
+import ProfileSettings from './pages/profile/ProfileSettings';
 
 export function App() {
+  useEffect(() => {
+    applyTheme(getSavedTheme());
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -176,6 +187,66 @@ export function App() {
                 element={
                   <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
                     <NotificationCenter />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 21: Employee Onboarding System */}
+              <Route
+                path="/onboarding"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <OnboardingChecklist />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 22: Resignation & Exit Management */}
+              <Route
+                path="/resignations"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <ResignationCenter />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 23: Internal Announcements System */}
+              <Route
+                path="/announcements"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <AnnouncementBoard />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 24: Internal Task Management */}
+              <Route
+                path="/tasks"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <TaskManager />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 26: Employee Feedback System */}
+              <Route
+                path="/feedback"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <FeedbackCenter />
+                  </RoleRoute>
+                }
+              />
+
+              {/* Module 27: Profile & Settings Management */}
+              <Route
+                path="/profile"
+                element={
+                  <RoleRoute allowedRoles={['EMPLOYEE', 'HR', 'ADMIN']}>
+                    <ProfileSettings />
                   </RoleRoute>
                 }
               />

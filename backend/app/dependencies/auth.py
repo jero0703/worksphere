@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordBearer, HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -19,10 +19,11 @@ http_bearer = HTTPBearer(auto_error=False)
 def get_current_user_optional(
     token: Optional[str] = Depends(oauth2_scheme),
     bearer_creds: Optional[HTTPAuthorizationCredentials] = Depends(http_bearer),
+    token_query: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db),
 ) -> Optional[User]:
     """Extract authenticated user if valid token is provided; returns None otherwise."""
-    actual_token = token or (bearer_creds.credentials if bearer_creds else None)
+    actual_token = token or (bearer_creds.credentials if bearer_creds else None) or token_query
     if not actual_token:
         return None
 
@@ -49,10 +50,11 @@ def get_current_user_optional(
 def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme),
     bearer_creds: Optional[HTTPAuthorizationCredentials] = Depends(http_bearer),
+    token_query: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db),
 ) -> User:
     """Validate access token and return the authenticated user."""
-    actual_token = token or (bearer_creds.credentials if bearer_creds else None)
+    actual_token = token or (bearer_creds.credentials if bearer_creds else None) or token_query
     if not actual_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

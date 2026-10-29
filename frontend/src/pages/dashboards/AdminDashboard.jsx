@@ -11,6 +11,15 @@ import {
   AlertCircle,
   CreditCard,
   CalendarCheck,
+  CheckSquare,
+  ListTodo,
+  Megaphone,
+  LogOut,
+  MessageSquareHeart,
+  BarChart3,
+  FileText,
+  Award,
+  Clock,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -121,38 +130,208 @@ export const AdminDashboard = () => {
       </div>
 
       {/* Admin Modules */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-        <h2 className="text-base font-bold text-slate-900 mb-4">Administration Modules</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Administration & Operations Modules</h2>
+            <p className="text-xs text-slate-500">Quick access to governance, workforce tracking, and employee experience workflows.</p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100">
+            All 12 Modules Active
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             to="/admin/users"
-            className="p-4 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/30 transition-all flex items-center justify-between group"
           >
-            <div>
-              <p className="font-semibold text-slate-800 text-sm">User & Role Management</p>
-              <p className="text-xs text-slate-500 mt-0.5">Control permissions, roles and account state</p>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-100 transition-colors">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">User & Role Management</p>
+                <p className="text-xs text-slate-500 mt-0.5">Control permissions, roles, and account state</p>
+              </div>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 transition-colors" />
           </Link>
+
+          <Link
+            to="/onboarding"
+            className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                <CheckSquare className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Employee Onboarding</p>
+                <p className="text-xs text-slate-500 mt-0.5">Milestone checklists & induction progress</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/tasks"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
+                <ListTodo className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Internal Task Tracking</p>
+                <p className="text-xs text-slate-500 mt-0.5">Assign, delegate, and monitor task deadlines</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/announcements"
+            className="p-4 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-hover:bg-amber-100 transition-colors">
+                <Megaphone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Company Announcements</p>
+                <p className="text-xs text-slate-500 mt-0.5">Broadcast bulletin notices & alerts</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-amber-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/resignations"
+            className="p-4 rounded-xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-rose-50 text-rose-600 rounded-lg group-hover:bg-rose-100 transition-colors">
+                <LogOut className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Resignation & Exit Management</p>
+                <p className="text-xs text-slate-500 mt-0.5">Notice periods, approvals & transition remarks</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-rose-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/feedback"
+            className="p-4 rounded-xl border border-slate-200 hover:border-pink-300 hover:bg-pink-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-pink-50 text-pink-600 rounded-lg group-hover:bg-pink-100 transition-colors">
+                <MessageSquareHeart className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Employee Feedback & Sentiment</p>
+                <p className="text-xs text-slate-500 mt-0.5">Anonymous ratings, pulse, and HR responses</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-pink-600 transition-colors" />
+          </Link>
+
           <Link
             to="/attendance"
-            className="p-4 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all flex items-center justify-between group"
           >
-            <div>
-              <p className="font-semibold text-slate-800 text-sm">Attendance Records</p>
-              <p className="text-xs text-slate-500 mt-0.5">Audit check-ins, corrections, and absences</p>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-100 transition-colors">
+                <CalendarCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Attendance Records</p>
+                <p className="text-xs text-slate-500 mt-0.5">Audit check-ins, corrections, and absences</p>
+              </div>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition-colors" />
           </Link>
+
           <Link
             to="/payroll"
-            className="p-4 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/30 transition-all flex items-center justify-between group"
           >
-            <div>
-              <p className="font-semibold text-slate-800 text-sm">Financial Audits & Payroll</p>
-              <p className="text-xs text-slate-500 mt-0.5">Generate payroll dispatches and PDF payslips</p>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-100 transition-colors">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Financial Audits & Payroll</p>
+                <p className="text-xs text-slate-500 mt-0.5">Generate payroll dispatches and PDF payslips</p>
+              </div>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/employees"
+            className="p-4 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-cyan-50 text-cyan-600 rounded-lg group-hover:bg-cyan-100 transition-colors">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Organization Directory</p>
+                <p className="text-xs text-slate-500 mt-0.5">Employee roster, 360 profiles & filtering</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/shifts"
+            className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 hover:bg-teal-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-teal-50 text-teal-600 rounded-lg group-hover:bg-teal-100 transition-colors">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Shift Scheduling</p>
+                <p className="text-xs text-slate-500 mt-0.5">Roster planning, night shifts & assignments</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/documents"
+            className="p-4 rounded-xl border border-slate-200 hover:border-orange-300 hover:bg-orange-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-100 transition-colors">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Document Management</p>
+                <p className="text-xs text-slate-500 mt-0.5">Certificates, contracts, ID proof storage</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-orange-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/analytics"
+            className="p-4 rounded-xl border border-slate-200 hover:border-violet-300 hover:bg-violet-50/30 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-violet-50 text-violet-600 rounded-lg group-hover:bg-violet-100 transition-colors">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Analytics & Reports</p>
+                <p className="text-xs text-slate-500 mt-0.5">Workforce insights, trends & CSV exports</p>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 transition-colors" />
           </Link>
         </div>
       </div>

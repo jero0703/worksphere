@@ -1,3 +1,6 @@
+import os
+os.environ["TESTING"] = "1"
+
 import pytest
 from decimal import Decimal
 from fastapi.testclient import TestClient
@@ -14,6 +17,12 @@ from app.models.leave import LeavePolicy, LeaveBalance, LeaveType
 from app.models.shift import Shift, EmployeeShift
 from app.models.document import Document
 from app.models.performance import Performance
+from app.models.onboarding import OnboardingTask
+from app.models.resignation import Resignation
+from app.models.announcement import Announcement
+from app.models.task import InternalTask
+from app.models.feedback import Feedback
+from app.models.user_settings import UserSettings
 from app.core.security import hash_password
 from app.core.permissions import UserRole
 from datetime import date, time
@@ -157,6 +166,10 @@ def setup_test_db():
             effective_from=date(2023, 1, 1),
             effective_to=None,
         ))
+
+    # Seed UserSettings
+    for u in [admin, hr, emp1, emp2]:
+        db.add(UserSettings(user_id=u.id))
 
     db.commit()
     db.close()

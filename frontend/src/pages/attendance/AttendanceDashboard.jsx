@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { attendanceApi } from '../../api/attendanceApi';
 import { shiftApi } from '../../api/shiftApi';
+import { integrationApi } from '../../api/integrationApi';
 import {
   Clock,
   CheckCircle,
@@ -15,6 +16,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Sparkles,
+  Download,
 } from 'lucide-react';
 
 export const AttendanceDashboard = () => {
@@ -469,6 +471,21 @@ export const AttendanceDashboard = () => {
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              <button
+                type="button"
+                onClick={() =>
+                  integrationApi.downloadAttendanceCsv({
+                    date: filterDate || undefined,
+                    department: filterDept || undefined,
+                    status: filterStatus || undefined,
+                  })
+                }
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+                title="Export filtered attendance report to CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
               <button
                 type="button"
                 onClick={handleTriggerAutoAbsent}

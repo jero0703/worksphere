@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from app.models.user import User
 from app.models.employee import Employee, EmployeeStatus
 from app.models.notification import Notification
+from app.models.user_settings import UserSettings
 from app.schemas.auth import RegisterRequest, Token
 from app.schemas.user import UserResponse
 from app.core.security import hash_password, verify_password, create_access_token
@@ -81,6 +82,9 @@ def register_user(db: Session, req: RegisterRequest) -> User:
         message="Your account has been registered successfully. You can now track attendance, apply for leaves, and view payslips.",
     )
     db.add(welcome_notification)
+
+    # Initialize user settings
+    db.add(UserSettings(user_id=user.id))
 
     db.commit()
     db.refresh(user)

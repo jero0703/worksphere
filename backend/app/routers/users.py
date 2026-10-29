@@ -13,6 +13,7 @@ from app.models.attendance import Attendance
 from app.models.leave import Leave
 from app.models.payroll import Payroll
 from app.models.notification import Notification
+from app.models.user_settings import UserSettings
 from app.schemas.user import UserResponse
 from app.core.permissions import UserRole
 from app.core.security import hash_password
@@ -141,6 +142,8 @@ def create_user_by_admin(
         title="Account Provisioned by Administrator",
         message=f"Welcome {emp.full_name}! Your account has been provisioned with the {user.role.value} role.",
     ))
+
+    db.add(UserSettings(user_id=user.id))
 
     db.commit()
     db.refresh(user)

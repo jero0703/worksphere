@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { payrollApi } from '../../api/payrollApi';
+import { integrationApi } from '../../api/integrationApi';
 import {
   CreditCard,
   Download,
@@ -15,6 +16,7 @@ import {
   TrendingUp,
   Building,
   Check,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 const formatError = (err, fallback = 'Operation failed') => {
@@ -273,16 +275,26 @@ export const PayrollDashboard = () => {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           {isHrOrAdmin && (
-            <button
-              onClick={() => {
-                setGenerateModalError('');
-                setShowGenerateModal(true);
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Generate Payroll</span>
-            </button>
+            <>
+              <button
+                onClick={() => integrationApi.downloadPayrollCsv({ month: selectedMonth || undefined })}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                title="Export Payroll Report to CSV"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>Export CSV</span>
+              </button>
+              <button
+                onClick={() => {
+                  setGenerateModalError('');
+                  setShowGenerateModal(true);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Generate Payroll</span>
+              </button>
+            </>
           )}
         </div>
       </div>

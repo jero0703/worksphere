@@ -16,7 +16,7 @@ An enterprise-grade, production-style full-stack Human Resource Management Syste
 - **PyJWT** – JSON Web Tokens with live role and account status validation
 - **ReportLab** – Enterprise PDF payslip generation
 - **Alembic** – Production database migrations
-- **Pytest & TestClient** – 44 automated unit & integration tests (100% passing)
+- **Pytest & TestClient** – 73 automated unit & integration tests across Modules 1–27 (100% passing)
 - **Uvicorn** – High-throughput ASGI web server
 
 ### Frontend
@@ -320,6 +320,70 @@ Open your browser at: **[http://localhost:5173](http://localhost:5173)**
 | `GET` | `/api/dashboard/hr` | Active headcount, today's attendance, pending leaves | **HR / ADMIN** |
 | `GET` | `/api/dashboard/admin` | Total accounts, role distribution, system health | **ADMIN** |
 
+### 8. Employee Onboarding System (`/api/onboarding`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/onboarding` | List onboarding tasks (scoped to self for employees) | Authenticated |
+| `GET` | `/api/onboarding/summary` | Progress percentage and checklist breakdown | Authenticated |
+| `POST` | `/api/onboarding` | Assign onboarding checklist task | **HR / ADMIN** |
+| `PATCH` | `/api/onboarding/{id}/status` | Toggle task completion status | Authenticated (Ownership) |
+| `PUT` | `/api/onboarding/{id}` | Edit task name and target due date | **HR / ADMIN** |
+| `DELETE` | `/api/onboarding/{id}` | Remove onboarding task | **HR / ADMIN** |
+
+### 9. Resignation & Exit Management (`/api/resignations`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/resignations` | List resignation requests (scoped to self for employees) | Authenticated |
+| `GET` | `/api/resignations/{id}` | View resignation request detail | Authenticated (Ownership) |
+| `POST` | `/api/resignations` | Submit formal resignation request | Authenticated (Employee) |
+| `PATCH` | `/api/resignations/{id}/review` | Approve or reject resignation with remarks | **HR / ADMIN** |
+
+### 10. Internal Announcements System (`/api/announcements`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/announcements` | Bulletin feed with priority badges and search | Authenticated |
+| `GET` | `/api/announcements/{id}` | View announcement detail | Authenticated |
+| `POST` | `/api/announcements` | Publish company announcement (broadcasts if Urgent/High) | **HR / ADMIN** |
+| `PUT` | `/api/announcements/{id}` | Edit announcement title, priority, or message | **HR / ADMIN** |
+| `DELETE` | `/api/announcements/{id}` | Remove announcement from bulletin | **HR / ADMIN** |
+
+### 11. Internal Task Assignment & Tracking (`/api/tasks`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/tasks` | List assigned tasks with search and priority filter | Authenticated (Ownership) |
+| `GET` | `/api/tasks/metrics` | Counts of Total, Pending, In-Progress, Completed, Overdue | Authenticated |
+| `GET` | `/api/tasks/{id}` | View task details | Authenticated (Ownership) |
+| `POST` | `/api/tasks` | Create and assign task to employee | **HR / ADMIN** |
+| `PATCH` | `/api/tasks/{id}/status` | Update task status (Pending, In Progress, Completed) | Authenticated (Ownership) |
+| `PUT` | `/api/tasks/{id}` | Edit task details, priority, or due date | **HR / ADMIN** |
+| `DELETE` | `/api/tasks/{id}` | Delete task | **HR / ADMIN** |
+
+### 12. Third-Party Integrations & Exports (`/api/calendar` & `/api/exports`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/calendar/export.ics` | RFC 5545 iCalendar stream of shifts and leaves | Authenticated |
+| `GET` | `/api/calendar/google/status` | Google Calendar OAuth integration status | Authenticated |
+| `GET` | `/api/exports/attendance.csv` | Sanitized CSV export of daily attendance | Authenticated (Ownership) |
+| `GET` | `/api/exports/payroll.csv` | Sanitized CSV export of salary computations | Authenticated (Ownership) |
+| `GET` | `/api/exports/leaves.csv` | Sanitized CSV export of leave requests | Authenticated (Ownership) |
+
+### 13. Employee Feedback System (`/api/feedback`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/feedback` | Submit 1–5 star rating and feedback (with Anonymous option) | Authenticated |
+| `GET` | `/api/feedback` | List feedback (anonymity preserved for HR/Admin) | Authenticated |
+| `GET` | `/api/feedback/metrics` | Average sentiment rating and category breakdown | **HR / ADMIN** |
+| `PATCH` | `/api/feedback/{id}/status` | Acknowledge feedback and submit HR response | **HR / ADMIN** |
+
+### 14. Profile & Settings Management (`/api/profile`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/profile` | Comprehensive profile, employee info, and settings | Authenticated |
+| `PUT` | `/api/profile` | Self-service update of phone, address, emergency contact | Authenticated |
+| `POST` | `/api/profile/change-password` | Argon2 password change verifying current password | Authenticated |
+| `GET` | `/api/profile/settings` | Notification preferences and interface theme | Authenticated |
+| `PUT` | `/api/profile/settings` | Update email/in-app notification toggles and theme | Authenticated |
+
 ---
 
 ## 🛡️ Key Architectural & Security Guarantees
@@ -328,4 +392,8 @@ Open your browser at: **[http://localhost:5173](http://localhost:5173)**
 - **Atomic Balance Deductions**: Leave approval uses MySQL row-level locking (`with_for_update`) to prevent race conditions and negative balances under concurrent approvals.
 - **Last Active Admin Protection**: The system prevents the last active Administrator from being demoted, deactivated, or deleted.
 - **Audit-Safe Soft Deletion**: When deleting a user with financial or attendance history, the system automatically transitions the user to deactivated state to preserve audit integrity.
-- **Duplicate Prevention**: Prevents multiple check-ins on the same day and prevents duplicate payroll generation for the same employee in the same month.
+- **CSV Formula Injection Defense**: All tabular export endpoints sanitize user input starting with `=`, `+`, `-`, `@`, `\t`, or `\r` by prefixing with a single quote to prevent DDE code execution in spreadsheet software.
+- **Resignation Non-Deactivation Policy**: Approving a resignation updates the exit workflow status and records handover remarks, but never deletes or prematurely deactivates the employee account.
+- **Anonymous Feedback Protection**: Submissions flagged as anonymous automatically redact employee identification and department details in HR/Admin queries.
+- **Secure Password Lifecycle**: Self-service password changes strictly verify the current Argon2 hash before applying the new password.
+- **Graceful Third-Party Integrations**: SMTP email notifications and Google Calendar OAuth interfaces handle offline/unconfigured environments gracefully without raising 500 errors or leaking credentials.

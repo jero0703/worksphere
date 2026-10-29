@@ -31,6 +31,19 @@ class Settings(BaseSettings):
     LATE_GRACE_MINUTES: int = 15
     AUTO_ABSENT_CUTOFF_HOUR: int = 18
 
+    # SMTP & Email Settings
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_TLS: bool = True
+    EMAILS_FROM_EMAIL: str = "noreply@worksphere.local"
+    EMAILS_FROM_NAME: str = "WorkSphere HRMS"
+
+    # Third-party integration configurations
+    GOOGLE_CALENDAR_CLIENT_ID: Optional[str] = None
+    GOOGLE_CALENDAR_CLIENT_SECRET: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

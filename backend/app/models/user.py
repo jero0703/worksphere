@@ -25,3 +25,5 @@ class User(Base):
     # Relationships
     employee = relationship("Employee", back_populates="user", uselist=False, cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    settings = relationship("UserSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    announcements = relationship("Announcement", back_populates="author", cascade="all, delete-orphan")

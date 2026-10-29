@@ -11,6 +11,12 @@ import {
   AlertCircle,
   CreditCard,
   UserCheck,
+  ListTodo,
+  Megaphone,
+  LogOut,
+  MessageSquareHeart,
+  FileText,
+  Award,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -119,38 +125,101 @@ export const HrDashboard = () => {
       </div>
 
       {/* HR Operations Shortcuts */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-        <h2 className="text-base font-bold text-slate-900 mb-4">HR Operations Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900">HR Operations & Workforce Hub</h2>
+          <p className="text-xs text-slate-500">Quick shortcuts to manage leaves, onboarding, tasks, and employee communication.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             to="/attendance"
-            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between group"
           >
             <div>
               <p className="font-semibold text-slate-800 text-sm">Attendance Summary</p>
               <p className="text-xs text-slate-500 mt-0.5">Daily & monthly attendance logs & corrections</p>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
           </Link>
           <Link
             to="/leaves"
-            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between group"
           >
             <div>
               <p className="font-semibold text-slate-800 text-sm">Leave Approvals</p>
               <p className="text-xs text-slate-500 mt-0.5">Approve or reject time off with notes</p>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
           </Link>
           <Link
             to="/payroll"
-            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between group"
           >
             <div>
               <p className="font-semibold text-slate-800 text-sm">Payroll Management</p>
               <p className="text-xs text-slate-500 mt-0.5">Salary generation and distribution</p>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+          </Link>
+          <Link
+            to="/onboarding"
+            className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Employee Onboarding</p>
+              <p className="text-xs text-slate-500 mt-0.5">Checklist milestones and induction tracking</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+          <Link
+            to="/tasks"
+            className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Internal Task Tracking</p>
+              <p className="text-xs text-slate-500 mt-0.5">Assign, delegate, and monitor operational tasks</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+          <Link
+            to="/announcements"
+            className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Company Announcements</p>
+              <p className="text-xs text-slate-500 mt-0.5">Post company news, updates and notices</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+          <Link
+            to="/resignations"
+            className="p-4 rounded-xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Resignation Requests</p>
+              <p className="text-xs text-slate-500 mt-0.5">Review notice periods & exit workflows</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-rose-600 transition-colors" />
+          </Link>
+          <Link
+            to="/feedback"
+            className="p-4 rounded-xl border border-slate-200 hover:border-pink-300 hover:bg-pink-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Employee Feedback</p>
+              <p className="text-xs text-slate-500 mt-0.5">Review sentiment, ratings and respond</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-pink-600 transition-colors" />
+          </Link>
+          <Link
+            to="/employees"
+            className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between group"
+          >
+            <div>
+              <p className="font-semibold text-slate-800 text-sm">Employee Directory</p>
+              <p className="text-xs text-slate-500 mt-0.5">Browse 360-degree employee profiles</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
           </Link>
         </div>
 

@@ -85,23 +85,30 @@ export const Navbar = ({ onToggleSidebar }) => {
 
         {/* User Badge & Profile */}
         <div className="flex items-center gap-3 border-l border-slate-200 pl-3 sm:pl-4">
-          <div className="hidden sm:flex flex-col text-right">
-            <span className="text-sm font-semibold text-slate-800">
-              {user?.employee?.full_name || user?.username}
-            </span>
-            <div className="flex items-center justify-end gap-1.5">
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getRoleBadge(user?.role)}`}>
-                {user?.role}
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity focus:outline-none"
+            title="View Profile & Settings"
+          >
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-sm font-semibold text-slate-800">
+                {user?.employee?.full_name || user?.username}
               </span>
-              <span className="text-xs text-slate-500">
-                {user?.employee?.department || 'Staff'}
-              </span>
+              <div className="flex items-center justify-end gap-1.5">
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getRoleBadge(user?.role)}`}>
+                  {user?.role}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {user?.employee?.department || 'Staff'}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-semibold text-sm">
-            {user?.employee?.full_name ? user.employee.full_name.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
-          </div>
+            <div className="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-semibold text-sm shadow-sm hover:ring-2 hover:ring-indigo-400 transition-all">
+              {user?.employee?.full_name ? user.employee.full_name.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
+            </div>
+          </button>
 
           {/* Quick Logout */}
           <button

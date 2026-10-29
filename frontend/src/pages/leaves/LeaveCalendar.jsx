@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { leaveApi } from '../../api/leaveApi';
+import { integrationApi } from '../../api/integrationApi';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -15,6 +16,8 @@ import {
   Shield,
   Eye,
   Info,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export const LeaveCalendar = () => {
@@ -195,6 +198,28 @@ export const LeaveCalendar = () => {
             >
               <ChevronRight className="w-4 h-4" />
             </button>
+          </div>
+
+          {/* Module 25: Calendar & Leaves Exports */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => integrationApi.downloadIcsCalendar(user?.employee?.id)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold border border-indigo-200 transition-colors"
+              title="Export iCalendar (.ics) for Google Calendar, Outlook, Apple Calendar"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export .ics</span>
+            </button>
+            {isHrOrAdmin && (
+              <button
+                onClick={() => integrationApi.downloadLeavesCsv({ department: selectedDept || undefined })}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition-colors"
+                title="Export Leave Report as CSV"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Export CSV</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

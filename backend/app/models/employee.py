@@ -22,6 +22,8 @@ class Employee(Base):
     joining_date = Column(Date, nullable=False)
     salary = Column(Numeric(12, 2), nullable=False)
     phone = Column(String(20), nullable=True)
+    address = Column(String(255), nullable=True)
+    emergency_contact = Column(String(100), nullable=True)
     status = Column(
         SQLEnum(EmployeeStatus, native_enum=False, values_callable=lambda x: [e.value for e in x]),
         default=EmployeeStatus.ACTIVE,
@@ -40,3 +42,7 @@ class Employee(Base):
     employee_shifts = relationship("EmployeeShift", back_populates="employee", cascade="all, delete-orphan", order_by="desc(EmployeeShift.effective_from)")
     documents = relationship("Document", back_populates="employee", cascade="all, delete-orphan", order_by="desc(Document.uploaded_at)")
     performances = relationship("Performance", back_populates="employee", cascade="all, delete-orphan", order_by="desc(Performance.created_at)")
+    onboarding_tasks = relationship("OnboardingTask", back_populates="employee", cascade="all, delete-orphan", order_by="asc(OnboardingTask.due_date)")
+    resignations = relationship("Resignation", back_populates="employee", cascade="all, delete-orphan", order_by="desc(Resignation.created_at)")
+    tasks = relationship("InternalTask", back_populates="employee", cascade="all, delete-orphan", order_by="asc(InternalTask.due_date)")
+    feedbacks = relationship("Feedback", back_populates="employee", cascade="all, delete-orphan")

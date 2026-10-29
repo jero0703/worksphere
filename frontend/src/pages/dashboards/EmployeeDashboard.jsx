@@ -12,6 +12,12 @@ import {
   RefreshCw,
   CalendarDays,
   FileText,
+  CheckSquare,
+  ListTodo,
+  Megaphone,
+  MessageSquareHeart,
+  UserCog,
+  LogOut,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -204,6 +210,61 @@ export const EmployeeDashboard = () => {
               <div>
                 <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Notification Center</p>
                 <p className="text-xs text-slate-500 mt-0.5">View HR announcements & alerts</p>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+            </Link>
+
+            <Link
+              to="/onboarding"
+              className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+            >
+              <div>
+                <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Onboarding Checklist</p>
+                <p className="text-xs text-slate-500 mt-0.5">Complete orientation & new hire tasks</p>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+            </Link>
+
+            <Link
+              to="/tasks"
+              className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+            >
+              <div>
+                <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Assigned Tasks</p>
+                <p className="text-xs text-slate-500 mt-0.5">Track deliverables, deadlines & status</p>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+            </Link>
+
+            <Link
+              to="/announcements"
+              className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+            >
+              <div>
+                <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Company Announcements</p>
+                <p className="text-xs text-slate-500 mt-0.5">Bulletin updates & broadcast notices</p>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+            </Link>
+
+            <Link
+              to="/feedback"
+              className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+            >
+              <div>
+                <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Feedback & Suggestions</p>
+                <p className="text-xs text-slate-500 mt-0.5">Share anonymous feedback with HR</p>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+            </Link>
+
+            <Link
+              to="/profile"
+              className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex items-center justify-between group"
+            >
+              <div>
+                <p className="font-semibold text-slate-800 group-hover:text-indigo-600 text-sm">Profile & Settings</p>
+                <p className="text-xs text-slate-500 mt-0.5">Contact info, password, theme & exports</p>
               </div>
               <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
             </Link>
